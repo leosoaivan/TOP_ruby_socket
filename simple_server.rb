@@ -21,20 +21,29 @@ loop {
   verb,request,http_standard = socket.gets.split(" ", 3)
   request = request.gsub!(/\//, "")
 
-  if File.exist?("#{request}") && verb == "GET"
-    File.open("#{request}") do |file|
-      socket.print "HTTP/1.0 200 OK\r\n" +
-                   "Date: #{Time.new.strftime("%B %-d, %Y at %H:%M:%S")}\r\n" +
-                   "Content-Type: #{content_type(request)}\r\n" +
-                   "Content-Length: #{request.size}\r\n" +
-                   "Last-Modified: #{File.mtime(request).strftime("%B %-d, %Y")}\r\n\r\n"
+  if verb == "GET"
+    if File.exist?("#{request}")
+      File.open("#{request}") do |file|
+        socket.print "HTTP/1.0 200 OK\r\n" +
+                     "Date: #{Time.new.strftime("%B %-d, %Y at %H:%M:%S")}\r\n" +
+                     "Content-Type: #{content_type(request)}\r\n" +
+                     "Content-Length: #{request.size}\r\n" +
+                     "Last-Modified: #{File.mtime(request).strftime("%B %-d, %Y")}\r\n\r\n"
 
-      IO.copy_stream(request, socket)
+        IO.copy_stream(request, socket)
+      end
+    else
+      socket.print "HTTP/1.0 404 Not Found"
     end
-  elsif !File.exist?("#{request}") && verb == "GET"
-    socket.print "HTTP/1.0 404 Not Found\r\n\r\n"
+    
+  elsif verb == "POST"
+    socket.print "What is your name?"
+    # user_name = socket.gets.chomp
+    # socket.print "UserEmail: \r\n"
+    # user_email = gets.chomp
+    # socket.print "#{user_name} + " " + #{user_email}\r\n\r\n"
   else
-    socket.print "HTTP/1.0 501 Not Implemented\r\n\r\n"
+    socket.print "HTTP/1.0 501 Not Implemented"
   end
 
   socket.close

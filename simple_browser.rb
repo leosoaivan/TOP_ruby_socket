@@ -6,7 +6,7 @@ port = 2000                           # Default HTTP port
 path = "/index.html"                 # The file we want
 
 # This is the HTTP request we send to fetch a file
-request = "GET #{path} HTTP/1.0\r\n\r\n"
+request = "POST #{path} HTTP/1.0\r\n\r\n"
 
 socket = TCPSocket.open(host,port)  # Connect to server
 socket.print(request)               # Send request
