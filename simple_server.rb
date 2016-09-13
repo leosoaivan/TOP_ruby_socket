@@ -21,8 +21,7 @@ loop {
   verb,request,http_standard = socket.gets.split(" ", 3)
   request = request.gsub!(/\//, "")
 
-
-  if File.exist?("#{request}")
+  if File.exist?("#{request}") && verb == "GET"
     File.open("#{request}") do |file|
       socket.print "HTTP/1.0 200 OK\r\n" +
                    "Date: #{Time.new.strftime("%B %-d, %Y at %H:%M:%S")}\r\n" +
@@ -32,8 +31,10 @@ loop {
 
       IO.copy_stream(request, socket)
     end
-  else
+  elsif !File.exist?("#{request}") && verb == "GET"
     socket.print "HTTP/1.0 404 Not Found\r\n\r\n"
+  else
+    socket.print "HTTP/1.0 501 Not Implemented\r\n\r\n"
   end
 
   socket.close

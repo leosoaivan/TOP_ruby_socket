@@ -1,4 +1,5 @@
 require 'socket'
+require 'pry'
 
 host = 'localhost'     # The web server
 port = 2000                           # Default HTTP port
