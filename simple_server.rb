@@ -25,9 +25,10 @@ loop {
   if File.exist?("#{request}")
     File.open("#{request}") do |file|
       socket.print "HTTP/1.0 200 OK\r\n" +
-                   "Date: #{Time.new.strftime("%B %-d %Y, at %H:%M:%S")}\r\n" +
+                   "Date: #{Time.new.strftime("%B %-d, %Y at %H:%M:%S")}\r\n" +
                    "Content-Type: #{content_type(request)}\r\n" +
-                   "Content-Length: #{request.size}\r\n\r\n"
+                   "Content-Length: #{request.size}\r\n" +
+                   "Last-Modified: #{File.mtime(request).strftime("%B %-d, %Y")}\r\n\r\n"
 
       IO.copy_stream(request, socket)
     end
