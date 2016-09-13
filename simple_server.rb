@@ -1,17 +1,39 @@
-require 'socket'               # Get sockets from stdlib
+require 'socket'
+require 'pry'
 
-server = TCPServer.open(2000)  # Socket to listen on port 2000
-loop {                         # Servers run forever
-  client = server.accept       # Wait for a client to connect
-  verb,request,http_standard = client.gets.split(" ", 3)
-  request.gsub!(/\//, "")
+CONTENT_TYPE_MAPPING = {
+  'html' => 'text/html'
+}
 
-  response = File.open("#{request}", 'r').each { |line| puts line }
+server = TCPServer.open(2000)
 
-  client.puts   "HTTP/1.0 200 OK\r\n" +
-                "Content-Type: text/html\r\n" +
-                "Content-Length: #{response.size}\r\n\r\n" +
+def requested_file(request)
+  File.open("#{request}", 'r').each { |line| puts line }
+end
 
-  IO.copy_stream(response, client)
-  client.close                 # Disconnect from the client
+def content_type(request)
+  ext = request.split(".").last
+  CONTENT_TYPE_MAPPING.fetch(ext)
+end
+
+loop {
+  socket = server.accept
+  verb,request,http_standard = socket.gets.split(" ", 3)
+  request = request.gsub!(/\//, "")
+
+
+  if File.exist?("#{request}")
+    File.open("#{request}") do |file|
+      socket.print "HTTP/1.0 200 OK\r\n" +
+                   "Date: #{Time.new.strftime("%B %-d %Y, at %H:%M:%S")}\r\n" +
+                   "Content-Type: #{content_type(request)}\r\n" +
+                   "Content-Length: #{request.size}\r\n\r\n"
+
+      IO.copy_stream(request, socket)
+    end
+  else
+    socket.print "HTTP/1.0 404 Not Found\r\n\r\n"
+  end
+
+  socket.close
 }
