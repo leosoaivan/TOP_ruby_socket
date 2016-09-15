@@ -35,13 +35,9 @@ loop {
     else
       socket.print "HTTP/1.0 404 Not Found"
     end
-    
+
   elsif verb == "POST"
-    socket.print "What is your name?"
-    # user_name = socket.gets.chomp
-    # socket.print "UserEmail: \r\n"
-    # user_email = gets.chomp
-    # socket.print "#{user_name} + " " + #{user_email}\r\n\r\n"
+
   else
     socket.print "HTTP/1.0 501 Not Implemented"
   end
