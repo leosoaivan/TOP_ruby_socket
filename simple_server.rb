@@ -8,10 +8,6 @@ CONTENT_TYPE_MAPPING = {
 
 server = TCPServer.open(2000)
 
-def requested_file(path)
-  File.open("#{path}", 'r').each { |line| puts line }
-end
-
 def content_type(path)
   ext = path.split(".").last
   CONTENT_TYPE_MAPPING.fetch(ext)
