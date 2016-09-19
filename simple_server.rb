@@ -1,5 +1,6 @@
 require 'socket'
 require 'json'
+require 'pry'
 
 CONTENT_TYPE_MAPPING = {
   'html' => 'text/html'
@@ -19,21 +20,23 @@ end
 loop {
   socket = server.accept
   request = socket.recv(1000).split("\r\n\r\n")
+
   initial_line = request.first.split("\r\n")
   verb,path,http_standard = initial_line[0].split(" ")
   body = request.last
 
+  headers = "HTTP/1.0 200 OK\r\n" +
+               "Date: #{Time.new.strftime("%B %-d, %Y at %H:%M:%S")}\r\n" +
+               "Content-Type: #{content_type(path)}\r\n" +
+               "Content-Length: #{body.length}\r\n" +
+               "Last-Modified: #{File.mtime(path).strftime("%B %-d, %Y")}\r\n\r\n"
+
   if verb == "GET"
-    path = path[1..-1]
-    if File.exist?("#{path}")
-      File.open("#{path}") do |file|
-        socket.print "HTTP/1.0 200 OK\r\n" +
-                     "Date: #{Time.new.strftime("%B %-d, %Y at %H:%M:%S")}\r\n" +
-                     "Content-Type: #{content_type(path)}\r\n" +
-                     "Content-Length: #{path.size}\r\n" +
-                     "Last-Modified: #{File.mtime(path).strftime("%B %-d, %Y")}\r\n\r\n"
-        IO.copy_stream(path, socket)
-      end
+    if File.exist?(path)
+      body = ""
+      File.open(path).each { |line| body << line + "\r" }
+
+      socket.print(headers, body)
     else
       socket.print "HTTP/1.0 404 Not Found"
     end
@@ -44,15 +47,7 @@ loop {
             "      <li>Email: #{params['viking']['email']}</li>"
     body = File.read("#{path}").gsub("<%= yield %>", data)
 
-    socket.print "HTTP/1.0 200 OK\r\n" +
-                 "Date: #{Time.new.strftime("%B %-d, %Y at %H:%M:%S")}\r\n" +
-                 "Content-Type: #{content_type(path)}\r\n" +
-                 "Content-Length: #{path.size}\r\n" +
-                 "Last-Modified: #{File.mtime(path).strftime("%B %-d, %Y")}\r\n\r\n" +
-                 "#{body}"
-
-  else
-    socket.print "HTTP/1.0 501 Not Implemented"
+    socket.print(headers, body)
   end
 
   socket.close

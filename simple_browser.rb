@@ -6,7 +6,7 @@ class Browser
   def initialize
     @host = "localhost"
     @port = 2000
-    @path = "/index.html"
+    @path = "./index.html"
     @request_verb = ""
     @socket = TCPSocket.open(@host, @port)
     request_type
@@ -38,6 +38,8 @@ class Browser
                 "Content-Length: #{data.size}\r\n\r\n"+
                 "#{data}"
       @socket.print(request)
+    else
+      puts "HTTP/1.0 501 Not Implemented"
     end
   end
 
