@@ -1,6 +1,5 @@
 require 'socket'
 require 'json'
-require 'pry'
 
 class Browser
 
@@ -29,8 +28,10 @@ class Browser
       name = gets.chomp.split(" ").map(&:capitalize)
       print "What is your email address?  "
       email = gets.chomp
-      @path = "/thanks.html"
-      data = { :viking => { :name => "#{name}", :email => "#{email}" } }.to_json
+      puts ""
+
+      @path = "./thanks.html"
+      data = { :viking => { :name => name, :email => email } }.to_json
 
       request = "POST #{@path} HTTP/1.0\r\n" +
                 "From: #{email}\r\n" +
