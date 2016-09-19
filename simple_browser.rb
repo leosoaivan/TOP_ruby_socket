@@ -1,4 +1,5 @@
 require 'socket'
+require 'json'
 require 'pry'
 
 class Browser
@@ -17,19 +18,28 @@ class Browser
   def request_type
     print "What kind of request are you making? GET or POST?  "
     @request_verb = gets.chomp.upcase
-    puts "\r\n"
+    puts ""
   end
 
   def send_request
     if @request_verb == "GET"
-      @socket.print("#{@request_verb} #{@path} HTTP/1.0\r\n\r\n")
+      @socket.print("GET #{@path} HTTP/1.0\r\n\r\n")
     elsif @request_verb == "POST"
       print "What is your name?  "
-      name = gets.chomp.capitalize
+      name = gets.chomp.split(" ").map(&:capitalize)
       print "What is your email address?  "
       email = gets.chomp
+      @path = "/thanks.html"
+      data = { :viking => { :name => "#{name}", :email => "#{email}" } }.to_json
+
+      request = "POST #{@path} HTTP/1.0\r\n" +
+                "From: #{email}\r\n" +
+                "Content-Length: #{data.size}\r\n\r\n"+
+                "#{data}"
+      @socket.print(request)
     end
   end
+
 end
 
 x = Browser.new
